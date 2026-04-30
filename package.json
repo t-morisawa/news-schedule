@@ -1,0 +1,24 @@
+{
+  "name": "news-schedule",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Claude Code routinesで4ソースのAI関連トレンドを収集しDiscord/Slackへ通知するスケジューラ",
+  "type": "module",
+  "scripts": {
+    "aggregate": "tsx src/index.ts",
+    "aggregate:dry": "DRY_RUN=1 tsx src/index.ts",
+    "lint": "tsc --noEmit",
+    "playwright:install": "playwright install chromium"
+  },
+  "engines": {
+    "node": ">=20.10.0"
+  },
+  "dependencies": {
+    "playwright": "^1.50.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
