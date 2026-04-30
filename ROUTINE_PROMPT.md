@@ -20,18 +20,34 @@
 # やること
 1. リポジトリ直下で `npm ci` を実行（失敗したら `npm install`）
 2. `npx playwright install --with-deps chromium` を実行
-3. `npm run aggregate` を実行
-   - これにより以下4ソースのトップから「AI関連」記事のみが抽出され、
-     環境変数 `DISCORD_WEBHOOK_URL` または `SLACK_WEBHOOK_URL` に通知が送信されます
+3. `npm run scrape` を実行し、標準出力のJSONを取得する
+   - 以下4ソースのトップから「AI関連」記事のみが抽出され、各記事の本文テキストも含むJSONが出力される
      - https://news.ycombinator.com/
      - https://zenn.dev/
      - https://dev.to/
      - https://qiita.com/
-4. 実行後、最終的な標準出力（要約Markdown）をセッションログに保存して完了
+4. 取得したJSONの各記事（`bodyText` フィールド）を読み、あなた自身が日本語で3〜5文に要約する
+   - 英語記事も必ず日本語で要約すること
+   - `bodyText` が空の記事は「本文取得失敗」と記載する
+5. 以下のMarkdown形式でまとめる：
+
+📰 **AIトレンドまとめ** (日時)
+合計 N 件 / 4ソース
+
+## Hacker News (N)
+### [記事タイトル](URL) _(Xpt · 💬Y · @author)_
+ここに日本語要約3〜5文
+
+...（各記事同様）
+
+6. まとめたMarkdownを環境変数 `DISCORD_WEBHOOK_URL` または `SLACK_WEBHOOK_URL` に curl で送信する
+   - Discord: `curl -X POST -H "Content-Type: application/json" -d '{"content":"..."}' $DISCORD_WEBHOOK_URL`
+   - Slack: `curl -X POST -H "Content-Type: application/json" -d '{"text":"..."}' $SLACK_WEBHOOK_URL`
+   - 2000文字を超える場合は複数回に分けて送信する
 
 # 失敗時の挙動
 - いずれかのサイトのスクレイピングが失敗しても他のサイトの結果は通知する（部分成功OK）
-- Webhookの通知に失敗した場合のみ、終了コードを非ゼロにし失敗を明示する
+- Webhookの通知に失敗した場合のみ失敗を明示する
 - ネットワーク制限などで Playwright が起動できない場合は、その旨をDiscord/Slackに代替通知する
 
 # やらないこと

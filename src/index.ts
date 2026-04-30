@@ -1,13 +1,11 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { loadConfig } from "./config.js";
 import { launchBrowser } from "./browser.js";
 import { scrapeHackerNews } from "./sources/hackernews.js";
 import { scrapeZenn } from "./sources/zenn.js";
 import { scrapeDevTo } from "./sources/devto.js";
 import { scrapeQiita } from "./sources/qiita.js";
-import { summarizeAll } from "./summarize.js";
 import { buildSummary, notifyAll } from "./notify.js";
-import type { Article, SourceResult } from "./types.js";
+import type { SourceResult } from "./types.js";
 
 async function main(): Promise<void> {
   const config = loadConfig();
@@ -15,10 +13,9 @@ async function main(): Promise<void> {
   console.log(`[start] dryRun=${config.dryRun} max=${config.maxItemsPerSource}`);
 
   const handle = await launchBrowser();
-  let results: SourceResult[] = [];
+  const results: SourceResult[] = [];
 
   try {
-    // ソースごとに別ページを起動して並列収集
     const tasks = [
       runWith(handle.newPage, (p) =>
         scrapeHackerNews(p, config.aiKeywords, config.maxItemsPerSource),
@@ -41,24 +38,6 @@ async function main(): Promise<void> {
       } else {
         console.error("[scrape error]", s.reason);
       }
-    }
-
-    // 記事を要約（ANTHROPIC_API_KEYが設定されている場合のみ）
-    if (config.anthropicApiKey) {
-      const client = new Anthropic({ apiKey: config.anthropicApiKey });
-      const allArticles: Article[] = results.flatMap((r) => [...r.articles]);
-      console.log(`[summarize] ${allArticles.length}件の記事を要約します...`);
-      const summaries = await summarizeAll(handle.newPage, allArticles, client);
-
-      results = results.map((r) => ({
-        ...r,
-        articles: r.articles.map((a) => ({
-          ...a,
-          summary: summaries.get(a.url),
-        })),
-      }));
-    } else {
-      console.log("[summarize] ANTHROPIC_API_KEYが未設定のためスキップします");
     }
   } finally {
     await handle.close();

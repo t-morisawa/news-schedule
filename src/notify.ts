@@ -33,12 +33,8 @@ export function buildSummary(results: ReadonlyArray<SourceResult>): string {
       if (a.comments !== undefined) meta.push(`💬${a.comments}`);
       if (a.author) meta.push(`@${a.author}`);
       if (a.tags && a.tags.length > 0) meta.push(a.tags.slice(0, 3).map((t) => `#${t}`).join(" "));
-      const metaStr = meta.length > 0 ? ` _(${meta.join(" · ")})_` : "";
-      lines.push(`### [${a.title}](${a.url})${metaStr}`);
-      if (a.summary) {
-        lines.push(a.summary);
-      }
-      lines.push("");
+      const metaStr = meta.length > 0 ? `  _${meta.join(" · ")}_` : "";
+      lines.push(`- [${a.title}](${a.url})${metaStr}`);
     }
     lines.push("");
   }
