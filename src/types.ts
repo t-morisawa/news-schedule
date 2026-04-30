@@ -10,6 +10,7 @@ export type Article = Readonly<{
   publishedAt?: string;
   tags?: ReadonlyArray<string>;
   excerpt?: string;
+  summary?: string;
 }>;
 
 export type SourceResult = Readonly<{

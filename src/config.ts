@@ -45,6 +45,7 @@ export type Config = Readonly<{
   aiKeywords: ReadonlyArray<string>;
   dryRun: boolean;
   scrapeTimeoutMs: number;
+  anthropicApiKey?: string;
 }>;
 
 export function loadConfig(): Config {
@@ -65,6 +66,7 @@ export function loadConfig(): Config {
     aiKeywords: keywords,
     dryRun: process.env.DRY_RUN === "1" || process.env.DRY_RUN === "true",
     scrapeTimeoutMs: Number.isFinite(timeout) && timeout > 0 ? timeout : 30000,
+    anthropicApiKey: process.env.ANTHROPIC_API_KEY || undefined,
   };
 }
 
