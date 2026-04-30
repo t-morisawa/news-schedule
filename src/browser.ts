@@ -17,6 +17,7 @@ export async function launchBrowser(): Promise<BrowserHandle> {
     locale: "ja-JP",
     timezoneId: "Asia/Tokyo",
     viewport: { width: 1366, height: 900 },
+    ignoreHTTPSErrors: true,
   });
   context.setDefaultNavigationTimeout(30_000);
 
