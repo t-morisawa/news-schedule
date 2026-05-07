@@ -21,19 +21,25 @@ export async function scrapeDevTo(
         for (const a of links) {
           const href = a.getAttribute("href") ?? "";
           if (!href || href.startsWith("#")) continue;
-          // 個別記事URLは "/<user>/<slug>" 形式
-          if (!/^\/[^/]+\/[^/]+/.test(href)) continue;
+          // 絶対URL (https://dev.to/user/slug) と相対URL (/user/slug) の両方を許容
+          const path = href.startsWith("https://dev.to")
+            ? href.slice("https://dev.to".length)
+            : href;
+          if (!/^\/[^/]+\/[^/]+/.test(path)) continue;
           if (
-            href.startsWith("/tag/") ||
-            href.startsWith("/t/") ||
-            href.startsWith("/about") ||
-            href.startsWith("/enterprise")
+            path.startsWith("/tag/") ||
+            path.startsWith("/t/") ||
+            path.startsWith("/about") ||
+            path.startsWith("/enterprise") ||
+            path.startsWith("/billboards") ||
+            path.startsWith("/report-abuse") ||
+            path.startsWith("/settings")
           ) {
             continue;
           }
           const title = (a.textContent ?? "").replace(/\s+/g, " ").trim();
           if (!title || title.length < 6) continue;
-          const abs = href.startsWith("http") ? href : `https://dev.to${href}`;
+          const abs = (href.startsWith("http") ? href : `https://dev.to${href}`).split("#")[0];
           if (seen.has(abs)) continue;
           seen.add(abs);
 

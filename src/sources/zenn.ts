@@ -11,10 +11,9 @@ export async function scrapeZenn(
 ): Promise<SourceResult> {
   try {
     await page.goto(URL, { waitUntil: "domcontentloaded" });
-    // ZennトップページはSPA。記事カードのリンクが描画されるまで待つ。
-    await page.waitForSelector('a[href*="/articles/"], a[class*="ArticleList"]', {
-      timeout: 15_000,
-    });
+    // ZennトップページはSPA。記事カードはJS描画後に出るのでnetworkidleまで待つ。
+    await page.waitForLoadState("networkidle").catch(() => undefined);
+    await page.waitForSelector('a[href*="/articles/"]', { timeout: 15_000 });
 
     const raw = await page.$$eval('a[href*="/articles/"]', (links) => {
       const seen = new Set<string>();
@@ -22,6 +21,7 @@ export async function scrapeZenn(
       for (const a of links) {
         const href = a.getAttribute("href") ?? "";
         if (!href.includes("/articles/")) continue;
+        if (href.includes("/articles/explore")) continue;
         const title = (a.textContent ?? "").replace(/\s+/g, " ").trim();
         if (!title || title.length < 4) continue;
         const abs = href.startsWith("http") ? href : `https://zenn.dev${href}`;
