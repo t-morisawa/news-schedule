@@ -4,6 +4,7 @@ import { scrapeHackerNews } from "./sources/hackernews.js";
 import { scrapeZenn } from "./sources/zenn.js";
 import { scrapeDevTo } from "./sources/devto.js";
 import { scrapeQiita } from "./sources/qiita.js";
+import { scrapeReddit } from "./sources/reddit.js";
 import type { Article, SourceResult } from "./types.js";
 import type { Page } from "playwright";
 
@@ -40,6 +41,7 @@ async function main(): Promise<void> {
       runWith(handle.newPage, (p) => scrapeZenn(p, config.aiKeywords, config.maxItemsPerSource)),
       runWith(handle.newPage, (p) => scrapeDevTo(p, config.aiKeywords, config.maxItemsPerSource)),
       runWith(handle.newPage, (p) => scrapeQiita(p, config.aiKeywords, config.maxItemsPerSource)),
+      runWith(handle.newPage, (p) => scrapeReddit(p, config.aiKeywords, config.maxItemsPerSource)),
     ]);
 
     const scraped: SourceResult[] = settled
