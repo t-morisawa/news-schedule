@@ -1,4 +1,4 @@
-export type SourceId = "hackernews" | "zenn" | "devto" | "qiita";
+export type SourceId = "hackernews" | "zenn" | "devto" | "qiita" | "reddit";
 
 export type Article = Readonly<{
   source: SourceId;
