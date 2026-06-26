@@ -11,7 +11,21 @@ export type BrowserHandle = Readonly<{
 }>;
 
 export async function launchBrowser(): Promise<BrowserHandle> {
-  const browser = await chromium.launch({ headless: true });
+  const executablePath = process.env.CHROMIUM_EXECUTABLE_PATH || "/opt/pw-browsers/chromium";
+  const httpsProxy = process.env.HTTPS_PROXY || process.env.https_proxy;
+  const browser = await chromium.launch({
+    headless: true,
+    executablePath,
+    args: [
+      "--no-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+      "--ignore-certificate-errors",
+      "--ignore-ssl-errors",
+      "--disable-web-security",
+    ],
+    ...(httpsProxy ? { proxy: { server: httpsProxy } } : {}),
+  });
   const context = await browser.newContext({
     userAgent: USER_AGENT,
     locale: "ja-JP",
