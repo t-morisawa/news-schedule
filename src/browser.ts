@@ -11,7 +11,8 @@ export type BrowserHandle = Readonly<{
 }>;
 
 export async function launchBrowser(): Promise<BrowserHandle> {
-  const browser = await chromium.launch({ headless: true });
+  const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ?? "/opt/pw-browsers/chromium";
+  const browser = await chromium.launch({ headless: true, executablePath });
   const context = await browser.newContext({
     userAgent: USER_AGENT,
     locale: "ja-JP",
