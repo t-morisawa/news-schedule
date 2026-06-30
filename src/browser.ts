@@ -11,7 +11,18 @@ export type BrowserHandle = Readonly<{
 }>;
 
 export async function launchBrowser(): Promise<BrowserHandle> {
-  const browser = await chromium.launch({ headless: true });
+  const executablePath = process.env.PLAYWRIGHT_BROWSERS_PATH
+    ? `${process.env.PLAYWRIGHT_BROWSERS_PATH}/chromium-1194/chrome-linux/chrome`
+    : undefined;
+  const proxy = process.env.HTTPS_PROXY
+    ? { server: process.env.HTTPS_PROXY }
+    : undefined;
+  const browser = await chromium.launch({
+    headless: true,
+    executablePath,
+    proxy,
+    args: ["--ignore-certificate-errors"],
+  });
   const context = await browser.newContext({
     userAgent: USER_AGENT,
     locale: "ja-JP",

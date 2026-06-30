@@ -8,6 +8,7 @@
     "aggregate": "tsx src/index.ts",
     "aggregate:dry": "DRY_RUN=1 tsx src/index.ts",
     "scrape": "tsx src/scrape.ts",
+    "scrape:fetch": "NODE_EXTRA_CA_CERTS=/root/.ccr/ca-bundle.crt tsx src/scrape-fetch.ts",
     "lint": "tsc --noEmit",
     "playwright:install": "playwright install chromium"
   },
