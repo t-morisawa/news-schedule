@@ -1,6 +1,7 @@
 import type { Page } from "playwright";
 import type { Article, SourceResult } from "../types.js";
 import { isAIRelated } from "../config.js";
+import { gotoWithRetry } from "../browser.js";
 
 const URL = "https://zenn.dev/";
 
@@ -10,7 +11,7 @@ export async function scrapeZenn(
   limit: number,
 ): Promise<SourceResult> {
   try {
-    await page.goto(URL, { waitUntil: "domcontentloaded" });
+    await gotoWithRetry(page, URL, { waitUntil: "domcontentloaded" });
     // ZennトップページはSPA。記事カードはJS描画後に出るのでnetworkidleまで待つ。
     await page.waitForLoadState("networkidle").catch(() => undefined);
     await page.waitForSelector('a[href*="/articles/"]', { timeout: 15_000 });

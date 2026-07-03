@@ -1,5 +1,5 @@
 import { loadConfig } from "./config.js";
-import { launchBrowser } from "./browser.js";
+import { launchBrowser, gotoWithRetry } from "./browser.js";
 import { scrapeHackerNews } from "./sources/hackernews.js";
 import { scrapeZenn } from "./sources/zenn.js";
 import { scrapeDevTo } from "./sources/devto.js";
@@ -8,7 +8,7 @@ import type { Article, SourceResult } from "./types.js";
 import type { Page } from "playwright";
 
 async function fetchBodyText(page: Page, url: string): Promise<string> {
-  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 20_000 });
+  await gotoWithRetry(page, url, { waitUntil: "domcontentloaded", timeout: 20_000 });
   return page.evaluate(() => {
     for (const sel of ["article", "main", "[class*='article']", "[class*='post']", "[class*='content']"]) {
       const el = document.querySelector(sel);

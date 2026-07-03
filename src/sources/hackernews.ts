@@ -1,6 +1,7 @@
 import type { Page } from "playwright";
 import type { Article, SourceResult } from "../types.js";
 import { isAIRelated } from "../config.js";
+import { gotoWithRetry } from "../browser.js";
 
 const URL = "https://news.ycombinator.com/";
 
@@ -10,7 +11,7 @@ export async function scrapeHackerNews(
   limit: number,
 ): Promise<SourceResult> {
   try {
-    await page.goto(URL, { waitUntil: "domcontentloaded" });
+    await gotoWithRetry(page, URL, { waitUntil: "domcontentloaded" });
     await page.waitForSelector("tr.athing", { timeout: 15_000 });
 
     const raw = await page.$$eval("tr.athing", (rows) =>
