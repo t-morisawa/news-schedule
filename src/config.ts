@@ -68,7 +68,20 @@ export function loadConfig(): Config {
   };
 }
 
+// 英数字のみのキーワード("ai", "ml", "rag"等)は他の単語に埋め込まれた部分文字列として
+// 誤マッチしやすい(例: "ai"→"Airport"/"Paint", "ml"→"html", "rag"→"average"/"storage")。
+// そのため英数字キーワードは前後が英数字でない場合のみ("単語"として)マッチさせる。
+// 日本語キーワードは単語区切りが無いため従来通り部分一致で判定する。
+const ALPHANUMERIC_KEYWORD = /^[a-z0-9.+#-]+$/;
+
+function buildKeywordRegex(keyword: string): RegExp {
+  const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(?<![a-z0-9])${escaped}(?![a-z0-9])`);
+}
+
 export function isAIRelated(text: string, keywords: ReadonlyArray<string>): boolean {
   const lower = text.toLowerCase();
-  return keywords.some((k) => lower.includes(k));
+  return keywords.some((k) =>
+    ALPHANUMERIC_KEYWORD.test(k) ? buildKeywordRegex(k).test(lower) : lower.includes(k),
+  );
 }
