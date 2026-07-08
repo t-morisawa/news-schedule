@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { chromium, type Browser, type BrowserContext, type Page, type Route } from "playwright";
 
 const USER_AGENT =
@@ -21,11 +22,14 @@ async function fulfillViaFetch(route: Route): Promise<void> {
     delete headers["host"];
     delete headers["content-length"];
     const postData = request.postDataBuffer();
+    // 1本のリクエストがプロキシ越しにハングすると、Chromiumのホスト単位の同時接続数上限
+    // に空きが出ず、ページ全体の読み込みを道連れにして止めてしまう。個別にタイムアウトを切る。
     const res = await fetch(url, {
       method: request.method(),
       headers,
       body: postData ? new Uint8Array(postData) : undefined,
       redirect: "follow",
+      signal: AbortSignal.timeout(10_000),
     });
     const body = Buffer.from(await res.arrayBuffer());
     const responseHeaders: Record<string, string> = {};
@@ -45,8 +49,21 @@ export type BrowserHandle = Readonly<{
   close: () => Promise<void>;
 }>;
 
+// Claude Code Routinesのクラウド実行環境ではこのパスにChromiumがプリインストールされており、
+// `npx playwright install`で取得したリビジョンと食い違って起動に失敗することがあるため優先的に使う。
+// 存在しない環境(ローカル開発など)では通常通りPlaywrightが解決したパスにフォールバックする。
+const PREINSTALLED_CHROMIUM_PATH = "/opt/pw-browsers/chromium";
+
+function resolveExecutablePath(): string | undefined {
+  if (process.env.PLAYWRIGHT_CHROMIUM_PATH) return process.env.PLAYWRIGHT_CHROMIUM_PATH;
+  return existsSync(PREINSTALLED_CHROMIUM_PATH) ? PREINSTALLED_CHROMIUM_PATH : undefined;
+}
+
 export async function launchBrowser(): Promise<BrowserHandle> {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({
+    headless: true,
+    executablePath: resolveExecutablePath(),
+  });
   const context = await browser.newContext({
     userAgent: USER_AGENT,
     locale: "ja-JP",
