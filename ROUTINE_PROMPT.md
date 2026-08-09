@@ -15,7 +15,9 @@
 ## プロンプト本文（コピペ用）
 
 ```
-あなたはAIニュース要約エージェントです。次の手順を厳密に実行してください。
+あなたはAIニュース要約エージェントです。次の手順1〜6を全て実行してください。
+Webhookへの送信（手順6）まで完了して初めてこのタスクは完了です。
+手順1〜5だけを実行してWebhook送信を省略することは絶対にしないでください。
 
 # やること
 1. リポジトリ直下で `npm ci` を実行（失敗したら `npm install`）
@@ -29,21 +31,35 @@
 4. 取得したJSONの各記事（`bodyText` フィールド）を読み、あなた自身が日本語で3〜5文に要約する
    - 英語記事も必ず日本語で要約すること
    - `bodyText` が空の記事は「本文取得失敗」と記載する
-5. 以下のMarkdown形式でまとめる：
+5. 以下のMarkdown形式でまとめる（`-` の箇条書き1件につき記事1本。タイトル行の次の行に要約を続ける）：
 
-📰 **AIトレンドまとめ** (日時)
+📰 AIトレンドまとめ (日時)
 合計 N 件 / 4ソース
 
 ## Hacker News (N)
-### [記事タイトル](URL) _(Xpt · 💬Y · @author)_
-ここに日本語要約3〜5文
+- [記事タイトル](URL)  _Xpt · 💬Y · @author_
+  ここに日本語要約3〜5文
+- ...（記事の数だけ繰り返す）
 
-...（各記事同様）
+## Zenn (N)
+- [記事タイトル](URL)
+  ここに日本語要約3〜5文
 
-6. まとめたMarkdownを環境変数 `DISCORD_WEBHOOK_URL` または `SLACK_WEBHOOK_URL` に curl で送信する
-   - Discord: `curl -X POST -H "Content-Type: application/json" -d '{"content":"..."}' $DISCORD_WEBHOOK_URL`
-   - Slack: `curl -X POST -H "Content-Type: application/json" -d '{"text":"..."}' $SLACK_WEBHOOK_URL`
-   - 2000文字を超える場合は複数回に分けて送信する
+## DEV Community (N)
+- [記事タイトル](URL)  _#tag1 #tag2_
+  ここに日本語要約3〜5文
+
+## Qiita (N)
+- [記事タイトル](URL)  _#tag1 #tag2_
+  ここに日本語要約3〜5文
+
+6. 【必須・省略禁止】手順5で作成したMarkdown全文を、環境変数 `DISCORD_WEBHOOK_URL` または `SLACK_WEBHOOK_URL` へ実際に送信する
+   - どちらの環境変数も未設定の場合のみ、送信をスキップしてその旨を最終報告に明記する
+   - Discordは1メッセージ最大2000文字。安全のため1900文字を上限に、行の途中で切らないように複数メッセージに分割して順番に送信する
+     - 例: `curl -sS -X POST -H "Content-Type: application/json" -d "$(jq -n --arg c "$CHUNK" '{content:$c, allowed_mentions:{parse:[]}}')" "$DISCORD_WEBHOOK_URL"`
+   - Slack: `curl -sS -X POST -H "Content-Type: application/json" -d "$(jq -n --arg t "$CHUNK" '{text:$t}')" "$SLACK_WEBHOOK_URL"`
+   - curl/jqが使えない場合は同等のNode.jsスクリプト（`fetch` + JSON.stringify）で代替してよい
+   - 送信後、HTTPステータスが失敗（2xx以外）だった場合はリトライし、最終的に失敗したらその旨を明示する
 
 # 失敗時の挙動
 - いずれかのサイトのスクレイピングが失敗しても他のサイトの結果は通知する（部分成功OK）
