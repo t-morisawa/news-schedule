@@ -21,18 +21,21 @@
 1. リポジトリ直下で `npm ci` を実行（失敗したら `npm install`）
 2. `npx playwright install --with-deps chromium` を実行
 3. `npm run scrape` を実行し、標準出力のJSONを取得する
-   - 以下4ソースのトップから「AI関連」記事のみが抽出され、各記事の本文テキストも含むJSONが出力される
+   - 以下6ソースから「AI関連」記事のみが抽出され、各記事の本文テキストも含むJSONが出力される
+     （TLDR AI / The Neuron はニュースレターの最新号1件。1号に複数トピックが載っているので主要トピックをまとめて要約する）
      - https://news.ycombinator.com/
      - https://zenn.dev/
      - https://dev.to/
      - https://qiita.com/
+     - https://tldr.tech/api/rss/ai （RSS先頭の記事）
+     - https://www.theneurondaily.com/
 4. 取得したJSONの各記事（`bodyText` フィールド）を読み、あなた自身が日本語で3〜5文に要約する
    - 英語記事も必ず日本語で要約すること
    - `bodyText` が空の記事は「本文取得失敗」と記載する
 5. 以下のMarkdown形式でまとめる：
 
 📰 **AIトレンドまとめ** (日時)
-合計 N 件 / 4ソース
+合計 N 件 / 6ソース
 
 ## Hacker News (N)
 ### [記事タイトル](URL) _(Xpt · 💬Y · @author)_
@@ -78,13 +81,17 @@ Playwright を Node 経由ではなく [Playwright MCP](https://github.com/micro
 プロンプトを以下のようにスクリプトレスにできます。
 
 ```
-あなたはAIニュース要約エージェントです。次の4サイトのトップページを Playwright MCP で順に開き、
+あなたはAIニュース要約エージェントです。次の6サイトを Playwright MCP で順に開き、
 タイトルとURLからAI関連（LLM/GPT/Claude/RAG/エージェント/機械学習などのキーワードを含む）記事のみを
 最大5件ずつ抽出してください。
 - https://news.ycombinator.com/
 - https://zenn.dev/
 - https://dev.to/
 - https://qiita.com/
+- https://tldr.tech/api/rss/ai （RSS先頭の記事 = 最新号）
+- https://www.theneurondaily.com/ （トップ先頭の記事 = 最新号）
+
+TLDR AI / The Neuron はAI専門のためキーワード絞り込みは不要です。
 
 最後に、見やすいMarkdownにまとめ、環境変数 DISCORD_WEBHOOK_URL があればDiscordへ、
 SLACK_WEBHOOK_URL があればSlackへ、curl で送信してください（リポジトリ内の README.md

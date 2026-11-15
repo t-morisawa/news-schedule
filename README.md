@@ -1,17 +1,20 @@
 # news-schedule
 
-> Hacker News / Zenn / dev.to / Qiita の4ソースから **AI関連トピック** を集めて、
+> Hacker News / Zenn / dev.to / Qiita / TLDR AI / The Neuron の6ソースから **AI関連トピック** を集めて、
 > Discord または Slack の Webhook に通知する小さなジョブ。
 > [Claude Code Routines](https://code.claude.com/docs/ja/routines) で定期実行することを前提に作られています。
 
 ## できること
 
-- 4 つの公開サイトのトップを Playwright で巡回
+- 6 つの公開サイトを Playwright で巡回
   - <https://news.ycombinator.com/>
   - <https://zenn.dev/>
   - <https://dev.to/>
   - <https://qiita.com/>
+  - <https://tldr.tech/api/rss/ai>（RSS先頭 = 最新号のみ）
+  - <https://www.theneurondaily.com/>（トップ先頭 = 最新号のみ）
 - タイトル / タグから **AI 関連の記事のみ** を抽出（キーワードはカスタマイズ可）
+  - TLDR AI / The Neuron はAI専門のニュースレターなのでキーワード判定せず、最新号を1件取得
 - 結果を Markdown にまとめて Discord / Slack の Incoming Webhook へ送信
 - スケジュール実行は Claude Code の Routines に任せる（ローカル/CIでも動かせます）
 
