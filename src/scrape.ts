@@ -4,6 +4,8 @@ import { scrapeHackerNews } from "./sources/hackernews.js";
 import { scrapeZenn } from "./sources/zenn.js";
 import { scrapeDevTo } from "./sources/devto.js";
 import { scrapeQiita } from "./sources/qiita.js";
+import { scrapeTldr } from "./sources/tldr.js";
+import { scrapeNeuron } from "./sources/neuron.js";
 import type { Article, SourceResult } from "./types.js";
 import type { Page } from "playwright";
 
@@ -52,6 +54,8 @@ async function main(): Promise<void> {
       () => runWith(handle.newPage, (p) => scrapeZenn(p, config.aiKeywords, config.maxItemsPerSource)),
       () => runWith(handle.newPage, (p) => scrapeDevTo(p, config.aiKeywords, config.maxItemsPerSource)),
       () => runWith(handle.newPage, (p) => scrapeQiita(p, config.aiKeywords, config.maxItemsPerSource)),
+      () => runWith(handle.newPage, (p) => scrapeTldr(p)),
+      () => runWith(handle.newPage, (p) => scrapeNeuron(p, 1)),
     ];
     const settled: PromiseSettledResult<SourceResult>[] = [];
     for (const task of tasks) {
@@ -71,6 +75,11 @@ async function main(): Promise<void> {
     for (const r of scraped) {
       const articlesWithBody: Article[] = [];
       for (const article of r.articles) {
+        // ソース側で本文取得済み(TLDRなど)ならそのまま使う
+        if (article.bodyText) {
+          articlesWithBody.push(article);
+          continue;
+        }
         let bodyText = "";
         // プロキシの一時的なDNS解決失敗などで極端に短い本文しか取れないことがある。
         // 間隔を空けて最大3回まで取り直す(即座の連続リトライだと同じ瞬間の障害に

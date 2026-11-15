@@ -4,6 +4,8 @@ import { scrapeHackerNews } from "./sources/hackernews.js";
 import { scrapeZenn } from "./sources/zenn.js";
 import { scrapeDevTo } from "./sources/devto.js";
 import { scrapeQiita } from "./sources/qiita.js";
+import { scrapeTldr } from "./sources/tldr.js";
+import { scrapeNeuron } from "./sources/neuron.js";
 import { buildSummary, notifyAll } from "./notify.js";
 import type { SourceResult } from "./types.js";
 
@@ -29,6 +31,8 @@ async function main(): Promise<void> {
       runWith(handle.newPage, (p) =>
         scrapeQiita(p, config.aiKeywords, config.maxItemsPerSource),
       ),
+      runWith(handle.newPage, (p) => scrapeTldr(p)),
+      runWith(handle.newPage, (p) => scrapeNeuron(p, 1)),
     ];
 
     const settled = await Promise.allSettled(tasks);

@@ -12,7 +12,7 @@ export function buildSummary(results: ReadonlyArray<SourceResult>): string {
 
   const lines: string[] = [];
   lines.push(`📰 **AIトレンドまとめ** (${stamp})`);
-  lines.push(`合計 ${totalArticles} 件 / 4ソース`);
+  lines.push(`合計 ${totalArticles} 件 / ${results.length}ソース`);
   lines.push("");
 
   for (const r of results) {
